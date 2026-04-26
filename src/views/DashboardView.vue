@@ -3,7 +3,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import * as api from '@/api/endpoints'
+import { useFormat } from '@/composables/useFormat'
 import PageHeader from '@/components/ui/PageHeader.vue'
+
+const { fmtCount } = useFormat()
 
 const auth = useAuthStore()
 const router = useRouter()
@@ -74,7 +77,7 @@ onMounted(async () => {
             <div class="kpi-label">{{ $tt(c.title) }}</div>
             <div class="kpi-value">
               <span v-if="loading">…</span>
-              <span v-else>{{ counts[c.key] }}</span>
+              <span v-else>{{ fmtCount(counts[c.key]) }}</span>
             </div>
           </div>
           <div class="kpi-icon">{{ c.icon }}</div>

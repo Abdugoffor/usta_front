@@ -17,7 +17,7 @@ import AppToggle from '@/components/ui/AppToggle.vue'
 import DetailModal from '@/components/ui/DetailModal.vue'
 import InfoList from '@/components/ui/InfoList.vue'
 
-const { fmtDate, fmtPrice } = useFormat()
+const { fmtDate, fmtPrice, fmtCount } = useFormat()
 const { locale } = useI18n()
 
 const {
@@ -74,6 +74,12 @@ const cols = [
 
 const catOptions = computed(() =>
   allCategories.value.map((c) => ({ value: c.id, label: c.name })),
+)
+
+const headerTitle = computed(() =>
+  total.value !== null && total.value !== undefined
+    ? `${tt('Вакансии')} (${fmtCount(total.value)})`
+    : tt('Вакансии'),
 )
 
 const formOpen = ref(false)
@@ -194,7 +200,7 @@ const doRemove = async () => {
 
 <template>
   <div class="page">
-    <PageHeader :title="tt('Вакансии')" :subtitle="tt('Объявления о работе')">
+    <PageHeader :title="headerTitle" :subtitle="tt('Объявления о работе')">
       <template #actions>
         <button class="btn btn-primary" @click="openCreate">+ {{ tt('Создать') }}</button>
       </template>

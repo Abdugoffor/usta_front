@@ -18,6 +18,11 @@ export function useFormat() {
     return new Intl.NumberFormat('ru-RU').format(n)
   }
 
+  const fmtCount = (n) => {
+    if (n == null || n === '' || Number.isNaN(Number(n))) return '—'
+    return new Intl.NumberFormat('ru-RU').format(Number(n))
+  }
+
   // Multilang JSONB field: prefer URL/i18n active locale, then default,
   // then any active language, then any other key.
   const localized = (obj) => {
@@ -31,5 +36,5 @@ export function useFormat() {
     return v || ''
   }
 
-  return { fmtDate, fmtPrice, localized }
+  return { fmtDate, fmtPrice, fmtCount, localized }
 }
