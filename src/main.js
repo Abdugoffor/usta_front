@@ -12,6 +12,7 @@ import { setOnUnauthorized } from './api/client'
 import { installTt } from './composables/useTt'
 
 import './style.css'
+import './assets/public.css'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -35,7 +36,8 @@ setOnUnauthorized(() => {
   langs.reset()
   trStore.clearAll()
   const lang = i18n.global.locale.value || 'ru'
-  router.push(`/${lang}/auth/login`)
+  const onAdmin = (router.currentRoute.value?.fullPath || '').startsWith(`/${lang}/admin`)
+  router.push(onAdmin ? `/${lang}/admin/auth/login` : `/${lang}/auth/login`)
 })
 
 app.mount('#app')

@@ -29,7 +29,7 @@ const nav = computed(() => [
   { name: 'resumes',      path: 'resumes',      label: 'Резюме',           icon: '☰' },
 ])
 
-const linkFor = (item) => `/${locale.value}${item.path ? '/' + item.path : ''}`
+const linkFor = (item) => `/${locale.value}/admin${item.path ? '/' + item.path : ''}`
 
 const initials = computed(() => {
   const n = auth.user?.full_name || ''
@@ -38,13 +38,13 @@ const initials = computed(() => {
 
 const onLogout = () => {
   auth.logout()
-  router.push(`/${locale.value}/auth/login`)
+  router.push(`/${locale.value}/admin/auth/login`)
 }
 
 const change = (code) => {
   // Push the same path under a new locale prefix so URL becomes the source of truth.
   const tail = route.fullPath.replace(/^\/[a-z]{2}/, '')
-  router.push(`/${code}${tail || '/'}`)
+  router.push(`/${code}${tail || '/admin'}`)
 }
 
 const isActive = (name) => route.name === name

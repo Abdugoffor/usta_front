@@ -42,3 +42,15 @@ export const upload = (file) => {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
 }
+
+// ─── Public (unauthenticated) listing — used by the client site ───
+export const clientVacancies = {
+  list: (params) => client.get('/vacancies-client', { params }),
+  getBySlug: (slug) => client.get(`/vacancies-client/${slug}`),
+  count: (params) => client.get('/count/vacancies', { params }),
+}
+export const clientResumes = {
+  list: (params) => client.get('/resumes-client', { params }),
+  getBySlug: (slug) => client.get(`/resumes-client/${slug}`),
+  count: (params) => client.get('/count/resumes', { params }),
+}

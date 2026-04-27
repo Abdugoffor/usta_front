@@ -20,7 +20,8 @@ const submit = async () => {
   loading.value = false
   if (!res.ok) { err.value = res.error; return }
   toast.success('✓')
-  router.push(`/${route.params.lang || 'ru'}`)
+  const lang = route.params.lang || 'ru'
+  router.push(auth.isAdmin ? `/${lang}/admin` : `/${lang}`)
 }
 </script>
 
