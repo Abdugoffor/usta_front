@@ -26,7 +26,7 @@ const {
   reload, prev, next, onSort, resetFilter, create, update, remove,
 } = useCrud(
   vacancies,
-  { name: '', title: '', search: '', region_id: '', is_active: '', category_id: '', min_price: '', max_price: '' },
+  { name: '', title: '', search: '', region_id: '', is_active: '', category_ids: [], min_price: '', max_price: '' },
   { sortBy: 'created_at', sortOrder: 'desc' },
 )
 
@@ -219,13 +219,13 @@ const doRemove = async () => {
             <option v-for="r in allRegions" :key="r.id" :value="r.id">{{ r.name }}</option>
           </select>
         </div>
-        <div class="field">
-          <label class="field-label">{{ tt('Категории') }}</label>
-          <select class="select" v-model="filter.category_id" @change="reload()">
-            <option value="">{{ tt('Все') }}</option>
-            <option v-for="c in allCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
-          </select>
-        </div>
+        <MultiSelect
+          v-model="filter.category_ids"
+          :options="catOptions"
+          :label="tt('Категории')"
+          :placeholder="tt('Все')"
+          @update:modelValue="reload()"
+        />
         <div class="field">
           <label class="field-label">{{ tt('Статус') }}</label>
           <select class="select" v-model="filter.is_active" @change="reload()">

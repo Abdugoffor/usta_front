@@ -34,6 +34,11 @@ export function useCrud(api, defaultFilter = {}, defaultSort = { sortBy: 'id', s
     for (const k of Object.keys(filter)) {
       const v = filter[k]
       if (v === '' || v === null || v === undefined) continue
+      if (Array.isArray(v)) {
+        if (v.length === 0) continue
+        p[k] = v.join(',')
+        continue
+      }
       p[k] = v
     }
     return p
@@ -48,18 +53,6 @@ export function useCrud(api, defaultFilter = {}, defaultSort = { sortBy: 'id', s
       const meta = data.meta || {}
       hasMore.value = !!meta.has_more
       nextCursor.value = meta.next_cursor || ''
-      if (api.count) {
-        try {
-          const countParams = {}
-          for (const k of Object.keys(filter)) {
-            const v = filter[k]
-            if (v === '' || v === null || v === undefined) continue
-            countParams[k] = v
-          }
-          const r = await api.count(countParams)
-          total.value = r.data?.total ?? null
-        } catch { /* ignore */ }
-      }
     } catch (err) {
       toast.error(extractError(err))
       items.value = []
@@ -67,6 +60,23 @@ export function useCrud(api, defaultFilter = {}, defaultSort = { sortBy: 'id', s
       nextCursor.value = ''
     } finally {
       loading.value = false
+    }
+
+    if (api.count) {
+      const countParams = {}
+      for (const k of Object.keys(filter)) {
+        const v = filter[k]
+        if (v === '' || v === null || v === undefined) continue
+        if (Array.isArray(v)) {
+          if (v.length === 0) continue
+          countParams[k] = v.join(',')
+          continue
+        }
+        countParams[k] = v
+      }
+      api.count(countParams)
+        .then((r) => { total.value = r.data?.total ?? null })
+        .catch(() => { /* ignore */ })
     }
   }
 
@@ -102,7 +112,10 @@ export function useCrud(api, defaultFilter = {}, defaultSort = { sortBy: 'id', s
   }
 
   const resetFilter = async () => {
-    for (const k of Object.keys(filter)) filter[k] = defaultFilter[k] ?? ''
+    for (const k of Object.keys(filter)) {
+      const def = defaultFilter[k]
+      filter[k] = Array.isArray(def) ? [...def] : (def ?? '')
+    }
     await reload()
   }
 
