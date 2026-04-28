@@ -25,6 +25,10 @@ const cursor = ref('')
 const hasMore = ref(false)
 const limit = 12
 
+const total = ref(null)
+const counting = ref(false)
+let countSeq = 0
+
 const sortPair = computed(() => {
   switch (sortValue.value) {
     case 'price-asc':  return { sort_by: 'price', sort_order: 'asc' }
@@ -33,9 +37,8 @@ const sortPair = computed(() => {
   }
 })
 
-const buildParams = () => {
-  const p = { limit, ...sortPair.value }
-  if (cursor.value) p.cursor = cursor.value
+const buildFilter = () => {
+  const p = {}
   if (filter.search) p.search = filter.search
   if (filter.region_id) p.region_id = filter.region_id
   if (filter.district_id) p.district_id = filter.district_id
@@ -44,6 +47,12 @@ const buildParams = () => {
   if (filter.max_price) p.max_price = Number(filter.max_price)
   if (filter.is_active) p.is_active = true
   if ((filter.category_ids || []).length) p.category_ids = filter.category_ids.join(',')
+  return p
+}
+
+const buildParams = () => {
+  const p = { ...buildFilter(), limit, ...sortPair.value }
+  if (cursor.value) p.cursor = cursor.value
   return p
 }
 
@@ -58,7 +67,18 @@ const load = async (append = false) => {
   } catch { if (!append) items.value = [] } finally { loading.value = false }
 }
 
-const resetAndLoad = () => { cursor.value = ''; load(false) }
+const loadCount = () => {
+  const seq = ++countSeq
+  counting.value = true
+  clientVacancies.count(buildFilter())
+    .then(({ data }) => { if (seq === countSeq) total.value = Number(data?.total ?? 0) })
+    .catch(() => { if (seq === countSeq) total.value = null })
+    .finally(() => { if (seq === countSeq) counting.value = false })
+}
+
+const resetAndLoad = () => { cursor.value = ''; load(false); loadCount() }
+
+const fmtCount = (n) => (n == null ? '' : n.toLocaleString('ru-RU'))
 
 const submitSearch = () => {
   filter.search = search.value.trim()
@@ -72,7 +92,7 @@ watch(() => route.query.search, (v) => {
   if (filter.search !== next) { filter.search = next; resetAndLoad() }
 })
 
-onMounted(load)
+onMounted(() => { load(false); loadCount() })
 </script>
 
 <template>
@@ -95,7 +115,8 @@ onMounted(load)
         <div class="results">
           <div class="results-head">
             <span class="results-count">
-              <strong>{{ items.length }}</strong>
+              <strong v-if="total != null">{{ fmtCount(total) }}</strong>
+              <strong v-else>{{ items.length }}</strong>
               <span class="p-muted">{{ ' ' }}{{ tt('вакансий найдено') }}</span>
             </span>
             <select class="p-select sort-select" v-model="sortValue" @change="resetAndLoad">
