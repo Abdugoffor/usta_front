@@ -11,7 +11,7 @@ const { locale } = useI18n()
 const auth = useAuthStore()
 const toast = useToastStore()
 
-const form = reactive({ full_name: '', phone: '', password: '', role: 'user' })
+const form = reactive({ full_name: '', phone: '', password: '' })
 const loading = ref(false)
 const err = ref('')
 
@@ -47,14 +47,6 @@ const submit = async () => {
           <div class="p-field">
             <label class="p-label">{{ tt('Пароль') }}</label>
             <input class="p-input" type="password" v-model="form.password" placeholder="••••••••" required />
-          </div>
-
-          <div class="p-field">
-            <label class="p-label">{{ tt('Кто вы') }}?</label>
-            <select class="p-select" v-model="form.role">
-              <option value="user">{{ tt('Мастер / специалист') }}</option>
-              <option value="employer">{{ tt('Работодатель') }}</option>
-            </select>
           </div>
 
           <p v-if="err" class="p-error">{{ err }}</p>
