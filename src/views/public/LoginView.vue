@@ -14,7 +14,14 @@ const toast = useToastStore()
 
 const form = reactive({ phone: '', password: '' })
 const loading = ref(false)
+const tgLoading = ref(false)
 const err = ref('')
+
+const goNext = () => {
+  const redirect = String(route.query.redirect || '')
+  if (redirect.startsWith('/')) { router.push(redirect); return }
+  router.push(auth.isAdmin ? `/${locale.value}/admin` : `/${locale.value}/me`)
+}
 
 const submit = async () => {
   err.value = ''
@@ -23,9 +30,19 @@ const submit = async () => {
   loading.value = false
   if (!res.ok) { err.value = res.error; return }
   toast.success('✓')
-  const redirect = String(route.query.redirect || '')
-  if (redirect.startsWith('/')) { router.push(redirect); return }
-  router.push(auth.isAdmin ? `/${locale.value}/admin` : `/${locale.value}/me`)
+  goNext()
+}
+
+const loginTg = async () => {
+  err.value = ''
+  tgLoading.value = true
+  const res = await auth.loginViaTelegram((deepLink) => {
+    window.open(deepLink, '_blank', 'noopener')
+  })
+  tgLoading.value = false
+  if (!res.ok) { err.value = res.error; return }
+  toast.success('✓')
+  goNext()
 }
 </script>
 
@@ -54,6 +71,17 @@ const submit = async () => {
             <span>{{ tt('Войти') }}</span>
           </button>
 
+          <div class="auth-divider"><span>{{ tt('или') }}</span></div>
+
+          <button class="p-btn auth-submit auth-tg" type="button" :disabled="tgLoading" @click="loginTg">
+            <span v-if="tgLoading" class="p-spinner p-spinner-sm" />
+            <span>{{ tt('Войти через Telegram') }}</span>
+          </button>
+
+          <p v-if="tgLoading" class="p-muted" style="text-align: center; margin: 0;">
+            {{ tt('Откройте Telegram и нажмите Start') }}
+          </p>
+
           <p class="p-muted" style="text-align: center; margin: 4px 0 0;">
             {{ tt('Нет аккаунта') }}?
             <RouterLink :to="`/${locale}/auth/register`">{{ tt('Регистрация') }}</RouterLink>
@@ -70,4 +98,9 @@ const submit = async () => {
 .auth-card { width: 100%; max-width: 440px; padding: clamp(24px, 4vw, 36px); }
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
 .auth-submit { height: 46px; margin-top: 4px; }
+.auth-tg { background: #229ED9; color: #fff; border-color: #229ED9; }
+.auth-tg:hover:not(:disabled) { background: #1e8bc0; border-color: #1e8bc0; }
+.auth-divider { display: flex; align-items: center; gap: 10px; color: var(--p-muted, #888); margin: 6px 0; }
+.auth-divider::before,
+.auth-divider::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: .25; }
 </style>
