@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { tt } from '@/composables/useTt'
 import { fmtPrice, pickCatIcon } from '@/composables/usePublicData'
+import ShareMenu from '@/components/public/ShareMenu.vue'
 
 const props = defineProps({
   item: { type: Object, required: true },
@@ -25,6 +26,14 @@ const fmtDate = (iso) => {
   if (!iso) return ''
   try { return new Date(iso).toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-GB') } catch { return '' }
 }
+
+const telLink = computed(() => {
+  const c = props.item.contact || ''
+  return c ? `tel:${String(c).replace(/[^\d+]/g, '')}` : ''
+})
+
+const shareUrl = computed(() => (typeof window !== 'undefined' ? window.location.href : ''))
+const shareTitle = computed(() => props.item.name || props.item.title || '')
 </script>
 
 <template>
@@ -57,6 +66,14 @@ const fmtDate = (iso) => {
                 </span>
               </div>
             </div>
+
+            <ShareMenu
+              :url="shareUrl"
+              :title="shareTitle"
+              :contact="item.contact || ''"
+              :size="40"
+              class="detail-share"
+            />
           </header>
 
           <div v-if="(item.categories || []).length" class="detail-tags">
@@ -86,11 +103,12 @@ const fmtDate = (iso) => {
 
           <div v-if="item.contact" class="p-card">
             <div class="p-label" style="margin-bottom: 6px;">{{ tt('Контакт') }}</div>
-            <a :href="`tel:${item.contact}`" class="contact-link">
+            <a :href="telLink" class="contact-link">
               <span class="contact-icon">📞</span>
               <span>{{ item.contact }}</span>
             </a>
           </div>
+
 
           <div v-if="location || item.adress" class="p-card">
             <div class="p-label" style="margin-bottom: 6px;">{{ tt('Местоположение') }}</div>
@@ -127,7 +145,8 @@ const fmtDate = (iso) => {
 .detail-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; padding-bottom: 60px; }
 
 .detail-main { display: flex; flex-direction: column; gap: 22px; }
-.detail-head { display: grid; grid-template-columns: 88px 1fr; gap: 16px; align-items: start; }
+.detail-head { display: grid; grid-template-columns: 88px 1fr auto; gap: 16px; align-items: start; }
+.detail-share { align-self: start; }
 .detail-avatar {
   width: 88px; height: 88px; border-radius: 18px;
   background: var(--p-bg-soft);
@@ -164,9 +183,10 @@ const fmtDate = (iso) => {
 .info-line { display: flex; align-items: start; gap: 8px; padding: 4px 0; color: var(--p-text); font-size: 14px; }
 .info-icon { font-size: 14px; }
 
+
 @media (max-width: 980px) {
   .detail-grid { grid-template-columns: 1fr; }
-  .detail-head { grid-template-columns: 64px 1fr; }
+  .detail-head { grid-template-columns: 64px 1fr auto; }
   .detail-avatar { width: 64px; height: 64px; font-size: 28px; }
 }
 </style>
