@@ -46,6 +46,28 @@ export const useAuthStore = defineStore('auth', {
         return { ok: false, error: extractError(e) }
       }
     },
+    async loginViaTelegram(onDeepLink) {
+      try {
+        const { data } = await auth.telegramStart()
+        if (typeof onDeepLink === 'function') onDeepLink(data.deep_link)
+        const token = data.token
+
+        for (let i = 0; i < 150; i++) {
+          await new Promise((r) => setTimeout(r, 2000))
+          const { data: s } = await auth.telegramStatus(token)
+          if (s.status === 'done') {
+            this.setSession(s.jwt, s.user)
+            return { ok: true }
+          }
+          if (s.status === 'expired') {
+            return { ok: false, error: 'Telegram sessiyasi muddati tugadi' }
+          }
+        }
+        return { ok: false, error: 'Vaqt tugadi, qaytadan urinib ko’ring' }
+      } catch (e) {
+        return { ok: false, error: extractError(e) }
+      }
+    },
     logout() { this.clear() },
   },
 })

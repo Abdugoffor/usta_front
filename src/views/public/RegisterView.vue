@@ -11,8 +11,9 @@ const { locale } = useI18n()
 const auth = useAuthStore()
 const toast = useToastStore()
 
-const form = reactive({ full_name: '', phone: '', password: '', role: 'user' })
+const form = reactive({ full_name: '', phone: '', password: '' })
 const loading = ref(false)
+const tgLoading = ref(false)
 const err = ref('')
 
 const submit = async () => {
@@ -23,6 +24,18 @@ const submit = async () => {
   if (!res.ok) { err.value = res.error; return }
   toast.success('✓')
   router.push(`/${locale.value}/me`)
+}
+
+const registerTg = async () => {
+  err.value = ''
+  tgLoading.value = true
+  const res = await auth.loginViaTelegram((deepLink) => {
+    window.open(deepLink, '_blank', 'noopener')
+  })
+  tgLoading.value = false
+  if (!res.ok) { err.value = res.error; return }
+  toast.success('✓')
+  router.push(auth.isAdmin ? `/${locale.value}/admin` : `/${locale.value}/me`)
 }
 </script>
 
@@ -49,20 +62,23 @@ const submit = async () => {
             <input class="p-input" type="password" v-model="form.password" placeholder="••••••••" required />
           </div>
 
-          <div class="p-field">
-            <label class="p-label">{{ tt('Кто вы') }}?</label>
-            <select class="p-select" v-model="form.role">
-              <option value="user">{{ tt('Мастер / специалист') }}</option>
-              <option value="employer">{{ tt('Работодатель') }}</option>
-            </select>
-          </div>
-
           <p v-if="err" class="p-error">{{ err }}</p>
 
           <button class="p-btn p-btn-primary auth-submit" type="submit" :disabled="loading">
             <span v-if="loading" class="p-spinner p-spinner-sm" />
             <span>{{ tt('Зарегистрироваться') }}</span>
           </button>
+
+          <div class="auth-divider"><span>{{ tt('или') }}</span></div>
+
+          <button class="p-btn auth-submit auth-tg" type="button" :disabled="tgLoading" @click="registerTg">
+            <span v-if="tgLoading" class="p-spinner p-spinner-sm" />
+            <span>{{ tt('Регистрация через Telegram') }}</span>
+          </button>
+
+          <p v-if="tgLoading" class="p-muted" style="text-align: center; margin: 0;">
+            {{ tt('Откройте Telegram и нажмите Start') }}
+          </p>
 
           <p class="p-muted" style="text-align: center; margin: 4px 0 0;">
             {{ tt('Уже есть аккаунт') }}?
@@ -80,4 +96,9 @@ const submit = async () => {
 .auth-card { width: 100%; max-width: 440px; padding: clamp(24px, 4vw, 36px); }
 .auth-form { display: flex; flex-direction: column; gap: 14px; }
 .auth-submit { height: 46px; margin-top: 4px; }
+.auth-tg { background: #229ED9; color: #fff; border-color: #229ED9; }
+.auth-tg:hover:not(:disabled) { background: #1e8bc0; border-color: #1e8bc0; }
+.auth-divider { display: flex; align-items: center; gap: 10px; color: var(--p-muted, #888); margin: 6px 0; }
+.auth-divider::before,
+.auth-divider::after { content: ''; flex: 1; height: 1px; background: currentColor; opacity: .25; }
 </style>

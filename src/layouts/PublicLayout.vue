@@ -129,8 +129,8 @@ const onLogout = () => {
         </div>
         <div class="pub-footer-col">
           <div class="pub-footer-title">{{ tt('Контакты') }}</div>
-          <div class="pub-footer-link">Email: info@ustatop.uz</div>
-          <div class="pub-footer-link">{{ tt('Тел') }}: +998 90 123 45 67</div>
+          <div class="pub-footer-link">Email: abdugofforqodirov19@gmail.com</div>
+          <div class="pub-footer-link">{{ tt('Тел') }}: +998 94 105 04 05</div>
           <div class="pub-footer-link">{{ tt('Ташкент, Узбекистан') }}</div>
         </div>
       </div>

@@ -3,6 +3,8 @@ import client from './client'
 export const auth = {
   login: (data) => client.post('/auth/login', data),
   register: (data) => client.post('/auth/register', data),
+  telegramStart:  () => client.post('/auth/telegram/start'),
+  telegramStatus: (token) => client.get('/auth/telegram/status', { params: { token } }),
 }
 
 const crud = (resource) => ({

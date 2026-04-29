@@ -9,7 +9,7 @@ const route = useRoute()
 const auth = useAuthStore()
 const toast = useToastStore()
 
-const form = reactive({ full_name: '', phone: '', password: '', role: 'user' })
+const form = reactive({ full_name: '', phone: '', password: '' })
 const loading = ref(false)
 const err = ref('')
 
@@ -45,14 +45,6 @@ const submit = async () => {
     <div class="field">
       <label class="field-label">Пароль</label>
       <input class="input" type="password" v-model="form.password" placeholder="••••••••" required />
-    </div>
-
-    <div class="field">
-      <label class="field-label">Роль</label>
-      <select class="select" v-model="form.role">
-        <option value="user">Пользователь</option>
-        <option value="employer">Работодатель</option>
-      </select>
     </div>
 
     <p v-if="err" class="field-error">{{ err }}</p>
