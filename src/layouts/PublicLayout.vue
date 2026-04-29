@@ -21,7 +21,7 @@ watch(() => route.fullPath, () => { menuOpen.value = false })
 const link = (path = '') => `/${locale.value}${path}`
 
 const switchLang = (code) => {
-  const tail = route.fullPath.replace(/^\/[a-z]{2}/, '')
+  const tail = route.fullPath.replace(/^\/[a-z]{2,}/, '')
   router.push(`/${code}${tail || '/'}`)
 }
 

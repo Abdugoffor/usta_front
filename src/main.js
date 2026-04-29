@@ -27,17 +27,15 @@ useThemeStore().apply()
 const langs = useLanguagesStore()
 const trStore = useTranslationStore()
 
-// Pre-warm active languages even before auth so URL guard has data on first paint.
-langs.fetch().catch(() => {})
-
 setOnUnauthorized(() => {
   const auth = useAuthStore()
   auth.clear()
   langs.reset()
   trStore.clearAll()
-  const lang = i18n.global.locale.value || 'ru'
+  const lang = i18n.global.locale.value || langs.codes[0] || 'ru'
   const onAdmin = (router.currentRoute.value?.fullPath || '').startsWith(`/${lang}/admin`)
   router.push(onAdmin ? `/${lang}/admin/auth/login` : `/${lang}/auth/login`)
 })
 
-app.mount('#app')
+// Fetch languages before mounting so the router guard has data on first navigation.
+langs.fetch().catch(() => {}).finally(() => app.mount('#app'))

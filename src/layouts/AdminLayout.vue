@@ -42,8 +42,7 @@ const onLogout = () => {
 }
 
 const change = (code) => {
-  // Push the same path under a new locale prefix so URL becomes the source of truth.
-  const tail = route.fullPath.replace(/^\/[a-z]{2}/, '')
+  const tail = route.fullPath.replace(/^\/[a-z]{2,}/, '')
   router.push(`/${code}${tail || '/admin'}`)
 }
 

@@ -7,13 +7,16 @@ const AdminLayout  = () => import('@/layouts/AdminLayout.vue')
 const AuthLayout   = () => import('@/layouts/AuthLayout.vue')
 const PublicLayout = () => import('@/layouts/PublicLayout.vue')
 
+// Absolute fallback used only when the backend is unreachable.
 const DEFAULT_LANG = 'ru'
-const KNOWN_LANGS = ['ru', 'uz', 'en', 'qq', 'kk', 'tg', 'tr']
+
+// Lang segment: 2 or more lowercase letters (supports 2-letter and 3-letter codes).
+const LANG = '[a-z]{2,}'
 
 const routes = [
   // ─── Admin auth (must come before /:lang admin parent) ───
   {
-    path: '/:lang(\\w{2})/admin/auth',
+    path: `/:lang(${LANG})/admin/auth`,
     component: AuthLayout,
     meta: { guest: true, admin: true },
     children: [
@@ -25,7 +28,7 @@ const routes = [
 
   // ─── Admin panel ───
   {
-    path: '/:lang(\\w{2})/admin',
+    path: `/:lang(${LANG})/admin`,
     component: AdminLayout,
     meta: { auth: true },
     children: [
@@ -42,7 +45,7 @@ const routes = [
 
   // ─── Public client site (root /:lang) ───
   {
-    path: '/:lang(\\w{2})',
+    path: `/:lang(${LANG})`,
     component: PublicLayout,
     children: [
       { path: '',                  name: 'home',           component: () => import('@/views/public/HomeView.vue') },
@@ -60,11 +63,14 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     redirect: (to) => {
-      const cur = i18n.global.locale.value || localStorage.getItem('app_locale') || DEFAULT_LANG
-      const tail = to.fullPath.replace(/^\/+/, '')
-      const segs = tail.split('/').filter(Boolean)
-      if (KNOWN_LANGS.includes(segs[0])) return '/' + tail
-      return `/${cur}/${tail}`
+      const langs = useLanguagesStore()
+      const saved = (localStorage.getItem('app_locale') || DEFAULT_LANG).toLowerCase()
+      const cur   = (i18n.global.locale.value || saved).toLowerCase()
+      const tail  = to.fullPath.replace(/^\/+/, '')
+      const first = tail.split('/')[0] || ''
+      if (first && langs.has(first)) return '/' + tail
+      const lang = langs.has(cur) ? cur : (langs.has(saved) ? saved : (langs.codes[0] || DEFAULT_LANG))
+      return `/${lang}/${tail}`
     },
   },
 ]
@@ -79,39 +85,30 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  const auth = useAuthStore()
+  const auth  = useAuthStore()
   const langs = useLanguagesStore()
 
-  let lang = String(to.params.lang || '').toLowerCase()
-  const saved = (localStorage.getItem('app_locale') || DEFAULT_LANG).toLowerCase()
+  // Guarantee languages are loaded before any routing decision.
+  await langs.fetch()
 
-  if (!lang || !KNOWN_LANGS.includes(lang)) {
-    const path = to.fullPath.replace(/^\/+/, '')
-    return `/${saved}/${path}`
+  const saved = (localStorage.getItem('app_locale') || DEFAULT_LANG).toLowerCase()
+  const lang  = String(to.params.lang || '').toLowerCase()
+
+  // Redirect to a valid lang if the URL segment is missing or unknown.
+  if (!lang || !langs.has(lang)) {
+    const fallback = langs.has(saved) ? saved : (langs.codes[0] || DEFAULT_LANG)
+    const tail = to.fullPath.replace(/^\/[^/]*/, '')
+    return `/${fallback}${tail || '/'}`
   }
 
   if (i18n.global.locale.value !== lang) setLocale(lang)
 
-  // Admin requires auth.
   if (to.meta.auth && !auth.isAuthed) return `/${lang}/admin/auth/login`
-  // Admin guest pages: bounce authed users away.
   if (to.meta.guest && to.meta.admin && auth.isAuthed) return `/${lang}/admin`
-  // Client guest pages: bounce authed users to their cabinet (or admin home for admins).
   if (to.meta.guest && !to.meta.admin && auth.isAuthed) {
     return auth.isAdmin ? `/${lang}/admin` : `/${lang}/me`
   }
-  // Client cabinet requires login.
   if (to.meta.authClient && !auth.isAuthed) return `/${lang}/auth/login`
-
-  // Validate URL lang against active langs (admin only).
-  if (auth.isAuthed && to.meta.auth) {
-    if (!langs.loaded) await langs.fetch()
-    if (langs.codes.length && !langs.has(lang)) {
-      const fallback = langs.has(saved) ? saved : (langs.codes[0] || DEFAULT_LANG)
-      const tail = to.fullPath.replace(/^\/[a-z]{2}/, '')
-      return `/${fallback}${tail || '/'}`
-    }
-  }
 })
 
 export default router

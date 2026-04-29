@@ -57,6 +57,9 @@ export function useRegions() {
   const districts = ref([])
   const mahallas = ref([])
 
+  let _regionId = null
+  let _districtId = null
+
   const map = (rows) => (rows || []).map((r) => ({ id: r.id, name: localizedName(r.name, locale.value) }))
 
   const loadRegions = async () => {
@@ -66,19 +69,29 @@ export function useRegions() {
     } catch { regions.value = [] }
   }
   const loadDistricts = async (regionId) => {
-    if (!regionId) { districts.value = []; return }
+    _regionId = regionId ?? null
+    if (!regionId) { districts.value = []; mahallas.value = []; _districtId = null; return }
     try {
       const { data } = await countriesApi.active(regionId, locale.value)
       districts.value = map(data?.data)
     } catch { districts.value = [] }
   }
   const loadMahallas = async (districtId) => {
+    _districtId = districtId ?? null
     if (!districtId) { mahallas.value = []; return }
     try {
       const { data } = await countriesApi.active(districtId, locale.value)
       mahallas.value = map(data?.data)
     } catch { mahallas.value = [] }
   }
+
+  // When locale changes, re-fetch everything using the currently selected IDs.
+  watch(locale, async () => {
+    await loadRegions()
+    if (_regionId)   await loadDistricts(_regionId)
+    if (_districtId) await loadMahallas(_districtId)
+  })
+
   return { regions, districts, mahallas, loadRegions, loadDistricts, loadMahallas }
 }
 
