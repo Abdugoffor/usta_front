@@ -273,21 +273,21 @@ const doRemove = async () => {
           </header>
           <div class="form-row">
             <div class="field">
-              <label class="field-label">{{ tt('Имя') }} *</label>
-              <input class="input" v-model="form.name" required minlength="2" />
+              <label class="field-label">{{ tt('Имя') }}</label>
+              <input class="input" v-model="form.name" />
             </div>
             <div class="field">
-              <label class="field-label">{{ tt('Контакт') }} *</label>
-              <input class="input" v-model="form.contact" required minlength="5" placeholder="+998 ..." />
+              <label class="field-label">{{ tt('Контакт') }}</label>
+              <input class="input" v-model="form.contact" placeholder="+998 ..." />
             </div>
           </div>
           <div class="field">
-            <label class="field-label">{{ tt('Заголовок') }} *</label>
-            <input class="input" v-model="form.title" required minlength="2" />
+            <label class="field-label">{{ tt('Заголовок') }}</label>
+            <input class="input" v-model="form.title" />
           </div>
           <div class="field">
-            <label class="field-label">{{ tt('Описание') }} *</label>
-            <textarea class="textarea" v-model="form.text" required minlength="10" rows="4" />
+            <label class="field-label">{{ tt('Описание') }}</label>
+            <textarea class="textarea" v-model="form.text" rows="4" />
           </div>
         </section>
 
@@ -299,8 +299,8 @@ const doRemove = async () => {
           </header>
           <div class="form-row">
             <div class="field" style="grid-column: span 2;">
-              <label class="field-label">{{ tt('Адрес') }} *</label>
-              <input class="input" v-model="form.adress" required minlength="3" />
+              <label class="field-label">{{ tt('Адрес') }}</label>
+              <input class="input" v-model="form.adress" />
             </div>
             <div class="field">
               <label class="field-label">{{ tt('Цена') }}</label>

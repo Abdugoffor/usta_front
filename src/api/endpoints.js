@@ -41,7 +41,7 @@ export const upload = (file) => {
   const fd = new FormData()
   fd.append('photo', file)
   return client.post('/upload', fd, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': undefined },
   })
 }
 

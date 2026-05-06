@@ -141,7 +141,7 @@ const toggleCategory = (id) => {
 const onPhotoSelect = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
-  if (file.size > 3 * 1024 * 1024) { toast.error(tt('Файл больше 3 МБ')); return }
+  if (file.size > 20 * 1024 * 1024) { toast.error(tt('Файл больше 20 МБ')); return }
   try {
     const { data } = await upload(file)
     form.photo = data?.url || data?.path || data?.photo || form.photo
@@ -288,21 +288,21 @@ const initials = computed(() => {
             <div class="form-grid">
               <div class="p-field">
                 <label class="p-label">{{ tt('Имя') }}</label>
-                <input class="p-input" v-model="form.name" required minlength="2" maxlength="255" />
+                <input class="p-input" v-model="form.name" maxlength="255" />
               </div>
               <div class="p-field">
                 <label class="p-label">{{ tt('Заголовок') }}</label>
-                <input class="p-input" v-model="form.title" required minlength="2" maxlength="500" />
+                <input class="p-input" v-model="form.title" maxlength="500" />
               </div>
 
               <div class="p-field full">
                 <label class="p-label">{{ tt('Описание') }}</label>
-                <textarea class="p-textarea" v-model="form.text" required minlength="10" rows="5"></textarea>
+                <textarea class="p-textarea" v-model="form.text" rows="5"></textarea>
               </div>
 
               <div class="p-field">
                 <label class="p-label">{{ tt('Контакт') }}</label>
-                <input class="p-input" v-model="form.contact" required placeholder="+998 ..." minlength="5" maxlength="255" />
+                <input class="p-input" v-model="form.contact" placeholder="+998 ..." maxlength="255" />
               </div>
               <div class="p-field">
                 <label class="p-label">{{ tt('Цена (сум)') }}</label>
@@ -323,7 +323,7 @@ const initials = computed(() => {
                 </div>
                 <div class="p-field full">
                   <label class="p-label">{{ tt('Навыки') }}</label>
-                  <input class="p-input" v-model="form.skills" :placeholder="tt('Через запятую')" required minlength="2" />
+                  <input class="p-input" v-model="form.skills" :placeholder="tt('Через запятую')" />
                 </div>
               </template>
 
@@ -351,7 +351,7 @@ const initials = computed(() => {
 
               <div class="p-field full">
                 <label class="p-label">{{ tt('Адрес') }}</label>
-                <input class="p-input" v-model="form.adress" required minlength="3" maxlength="500" />
+                <input class="p-input" v-model="form.adress" maxlength="500" />
               </div>
 
               <div class="p-field full">
